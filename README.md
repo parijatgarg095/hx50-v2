@@ -10,6 +10,11 @@ Two variants are built side by side from the same data:
 
 The dashboard compares them: index level, turnover attribution, churn, and return after estimated trading costs.
 
+![HX-50 dashboard](docs/images/overview.png)
+
+**New to the code?** Start with the [code walkthrough](docs/WALKTHROUGH.md): architecture, how a number flows
+from CSV to screen, every UI view, the tests, and where to make common changes.
+
 ## Quick start
 
 ```powershell

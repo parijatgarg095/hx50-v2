@@ -94,7 +94,8 @@ button, input, select { font: inherit; color: inherit; }
   backdrop-filter: saturate(160%) blur(10px);
   border-bottom: 1px solid var(--border);
 }
-.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1 1 auto; }
+.brand > div { min-width: 0; }
 .brand-mark {
   display: grid; place-items: center; flex: none;
   width: 36px; height: 36px; border-radius: 9px;
@@ -103,7 +104,8 @@ button, input, select { font: inherit; color: inherit; }
 }
 .brand h1 { font-size: 16px; font-weight: 650; letter-spacing: -0.01em; }
 .brand p { font-size: 12.5px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.topbar-actions { display: flex; align-items: center; gap: 12px; }
+.topbar-actions { display: flex; align-items: center; gap: 12px; flex: none; }
+@media (max-width: 520px) { .btn .label { display: none; } .card-head, .toolbar { padding-inline: 16px; } }
 .run-chip {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 5px 10px; border: 1px solid var(--border); border-radius: 999px;
@@ -115,8 +117,9 @@ button, input, select { font: inherit; color: inherit; }
 @media (max-width: 860px) { .run-chip { display: none; } }
 
 /* ---------- layout ---------- */
+/* minmax(0, 1fr): without it the implicit column grows to the widest table and the page overflows on phones. */
 .page {
-  display: grid; gap: 20px;
+  display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr);
   max-width: 1360px; margin: 0 auto;
   padding: 24px clamp(16px, 4vw, 40px) 48px;
 }
