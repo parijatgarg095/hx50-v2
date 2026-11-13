@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HX-50 · Index Monitor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <script type="module" src="/assets/js/main.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">HX</span>
+      <div>
+        <h1>HX-50 Index</h1>
+        <p id="mandate-summary">Equal-weighted US large caps</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <span class="run-chip num" id="run-chip"><span class="dot"></span><span id="run-chip-text">Loading…</span></span>
+      <button class="btn btn-primary" id="open-mandate" type="button">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 6h8M4 14h4m4 0h4M16 6h0M12 4v4M8 12v4"/></svg>
+        Edit mandate
+      </button>
+    </div>
+  </header>
+
+  <main class="page">
+    <div id="banner" hidden></div>
+
+    <section class="kpis" id="kpis" aria-label="Key figures"></section>
+
+    <section class="card" aria-labelledby="chart-title">
+      <header class="card-head">
+        <div>
+          <h2 id="chart-title">Index level</h2>
+          <p>Stabilised (retention buffer) vs unstabilised (strict ranks) · base <span id="base-level">1,000</span></p>
+        </div>
+        <div class="segmented" id="range-picker" role="group" aria-label="Chart range">
+          <button type="button" data-range="21" aria-pressed="false">1M</button>
+          <button type="button" data-range="63" aria-pressed="false">3M</button>
+          <button type="button" data-range="all" aria-pressed="true">All</button>
+        </div>
+      </header>
+      <div class="legend" id="chart-legend"></div>
+      <div class="chart-wrap"><canvas id="level-chart" aria-label="Index level chart" role="img"></canvas></div>
+    </section>
+
+    <div class="grid-split">
+      <section class="card" aria-labelledby="scorecard-title">
+        <header class="card-head">
+          <div>
+            <h2 id="scorecard-title">Stabilisation scorecard</h2>
+            <p>What the retention buffer changes, across every rebalance</p>
+          </div>
+        </header>
+        <div class="table-wrap"><table class="table" id="scorecard"></table></div>
+      </section>
+
+      <section class="card" aria-label="Holdings and rebalances">
+        <div class="tabs" role="tablist">
+          <button type="button" role="tab" id="tab-holdings" aria-controls="panel-holdings" aria-selected="true" data-tab="holdings">Holdings</button>
+          <button type="button" role="tab" id="tab-rebalances" aria-controls="panel-rebalances" aria-selected="false" data-tab="rebalances">Rebalances<span class="count" id="rebalance-count"></span></button>
+        </div>
+
+        <div class="toolbar">
+          <div class="segmented" id="variant-picker" role="group" aria-label="Index variant">
+            <button type="button" data-variant="stabilised" aria-pressed="true">Stabilised</button>
+            <button type="button" data-variant="raw" aria-pressed="false">Unstabilised</button>
+          </div>
+          <div class="date-stepper" data-for="holdings">
+            <button class="icon-btn" id="prev-day" type="button" aria-label="Previous trading day">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5l-5 5 5 5"/></svg>
+            </button>
+            <input class="input num" type="date" id="as-of" aria-label="Composition date">
+            <button class="icon-btn" id="next-day" type="button" aria-label="Next trading day">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 5l5 5-5 5"/></svg>
+            </button>
+          </div>
+          <input class="input" type="search" id="ticker-filter" placeholder="Filter tickers" aria-label="Filter tickers" data-for="holdings">
+          <span class="muted" data-for="rebalances" hidden>
+            <span class="legend-inline"><i style="background: var(--accent)"></i>membership</span>
+            &nbsp;
+            <span class="legend-inline"><i style="background: color-mix(in srgb, var(--accent) 35%, var(--surface-sunken))"></i>reweight</span>
+          </span>
+        </div>
+
+        <div role="tabpanel" id="panel-holdings" aria-labelledby="tab-holdings">
+          <p class="status-line" id="holdings-status"></p>
+          <div class="table-wrap is-scroll"><table class="table" id="holdings"></table></div>
+        </div>
+        <div role="tabpanel" id="panel-rebalances" aria-labelledby="tab-rebalances" hidden>
+          <div class="table-wrap is-scroll"><table class="table" id="rebalances"></table></div>
+        </div>
+      </section>
+    </div>
+
+    <p class="footnote" id="footnote"></p>
+  </main>
+
+  <dialog class="sheet" id="mandate-dialog" aria-labelledby="mandate-title">
+    <form method="dialog" id="mandate-form" novalidate>
+      <div class="sheet-head">
+        <h2 id="mandate-title">Edit mandate</h2>
+        <p>Rebuilds both variants from source data. The current index keeps serving until the new one is ready.</p>
+      </div>
+      <div class="sheet-body">
+        <div class="field-row">
+          <div class="field">
+            <label for="f-size">Constituents</label>
+            <input class="input num" id="f-size" name="size" type="number" min="1" max="500" required>
+            <span class="hint">Names held, equally weighted</span>
+          </div>
+          <div class="field">
+            <label for="f-exclude-top">Exclude largest</label>
+            <input class="input num" id="f-exclude-top" name="exclude_top" type="number" min="0" max="500" required>
+            <span class="hint">Mega caps never held</span>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="f-buffer">Retention buffer</label>
+            <input class="input num" id="f-buffer" name="buffer" type="number" min="0" max="500" required>
+            <span class="hint">Ranks a holding may slip before removal</span>
+          </div>
+          <div class="field">
+            <label for="f-top-buffer">Top-edge buffer</label>
+            <input class="input num" id="f-top-buffer" name="top_buffer" type="number" min="0" max="500" required>
+            <span class="hint">0 keeps the top exclusion strict</span>
+          </div>
+        </div>
+        <div class="preview" id="mandate-preview" aria-live="polite"></div>
+        <p class="form-error" id="mandate-error" role="alert" hidden></p>
+      </div>
+      <div class="sheet-foot">
+        <button class="btn btn-ghost" type="button" id="mandate-cancel">Cancel</button>
+        <button class="btn btn-primary" type="submit" id="mandate-submit">Rebuild index</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+</body>
+</html>

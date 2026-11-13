@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hx50"
+version = "2.0.0"
+description = "HX-50: equal-weighted US large-cap index (market-cap ranks 11-60), rebalanced weekly."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn>=0.27",
+    "pandas>=2.0",
+]
+
+[project.optional-dependencies]
+fetch = ["yfinance>=0.2.40", "requests>=2.31", "lxml>=5.0"]
+dev = ["pytest>=8.0", "httpx>=0.27", "numpy>=1.26"]
+
+[project.scripts]
+hx50 = "hx50.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+hx50 = ["pipeline/*.sql", "storage/*.sql", "web/*.html", "web/assets/*.css", "web/assets/js/*.js", "web/assets/js/views/*.js"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
